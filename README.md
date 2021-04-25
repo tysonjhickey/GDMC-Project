@@ -1,15 +1,15 @@
-Computer Science 4303 Project Document
+Computer Science 4303 Project Document  
 Tyson Hickey - 201507225 - tjh557@mun.ca
 
-Python module requirements:
-requests>=2.21.0
-numpy>=1.19.2
-NBT>=1.5.0
-opencv_python>=4.4.0.44
+Python module requirements:  
+requests>=2.21.0  
+numpy>=1.19.2  
+NBT>=1.5.0  
+opencv_python>=4.4.0.44  
 matplotlib>=3.3.2
 
 Mod requirements:
-Forge Mod Launcher (https://files.minecraftforge.net/)
+Forge Mod Launcher (https://files.minecraftforge.net/)  
 Minecraft GDMC-HTTP Mod v0.4.1 (https://github.com/nilsgawlik/gdmc_http_interface/releases/tag/v0.4.1)
 
 Running the project:
