@@ -35,7 +35,7 @@ treeList = ["minecraft:oak_log", "minecraft:spruce_log", "minecraft:birch_log", 
 class Partition:
     def __init__(self, area):
         self.__area = [math.ceil(area[0] / 10), math.ceil(area[1] / 10), int(area[2] / 10), int(area[3] / 10)]
-        self.grid = [[False for x in range(self.__area[2])] for y in range(self.__area[3])]
+        self.grid = [["" for x in range(self.__area[2])] for y in range(self.__area[3])]
 
     def __str__(self):
         string = ""
@@ -49,12 +49,14 @@ class Partition:
     def isUsed(self, x, z):
         x = int(x / 10)
         z = int(z / 10)
-        return self.grid[x][z]
+        if self.grid[x][z]:
+            return True 
+        return False
 
-    def use(self, x, z):
+    def use(self, x, z, structure):
         x = int(x / 10)
         z = int(z / 10)
-        self.grid[x][z] = True
+        self.grid[x][z] = structure
 
     def buildHouses(self):
         for i in range(0, len(self.grid)):
