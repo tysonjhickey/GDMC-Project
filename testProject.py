@@ -34,14 +34,21 @@ class Grid:
     def __init__(self, area):
         self.__area = [math.ceil(area[0] / 10), math.ceil(area[1] / 10), int(area[2] / 10), int(area[3] / 10)]
         self.grid = [[None for x in range(self.__area[2])] for y in range(self.__area[3])]
-        self.activeCells = []
+        self.activeCells = [[None for x in range(self.__area[2])] for y in range(self.__area[3])]
 
     def __str__(self):
-        string = ""
+        string = "Structure Grid: \n"
         for i in range(len(self.grid)):
             string += "[ "
             for j in range(len(self.grid[0])):
                 string += str(self.grid[i][j]) + " "
+            string += "]\n"
+
+        string += "Closest Structure Grid: \n"
+        for i in range(len(self.activeCells)):
+            string += "[ "
+            for j in range(len(self.activeCells[0])):
+                string += str(self.activeCells[i][j]) + " "
             string += "]\n"
         return string
 
@@ -85,18 +92,13 @@ class Grid:
                         if nbs < deathLimit:
                             tempGrid[i][j] = None
                         else:
-                            tempGrid[i][j] = "Home"
+                            tempGrid[i][j] = "Structure"
                     else:
                         if nbs > birthLimit:
-                            tempGrid[i][j] = "Home"
+                            tempGrid[i][j] = "Structure"
                         else:
                             tempGrid[i][j] = None
             self.grid = tempGrid
-        self.activeCells = []
-        for i in range(len(self.grid)):
-            for j in range(len(self.grid[0])):
-                if self.grid[i][j]:
-                    self.activeCells.append([[i, j], None])
 
     def closestCell(self, x, z):
         tempList = []
@@ -105,25 +107,29 @@ class Grid:
                 if self.grid[i][j]:
                     tempList.append([[i, j], abs(x-i) + abs(z-j)])
         sortedList = sorted(tempList, key = lambda x: x[1])
+        #self.activeCells[x][z] = True
         sortedList.pop(0)
         for i in range(len(sortedList)):
-            for j in range(len(self.activeCells)):
-                if x is self.activeCells[j][0][0] and z is self.activeCells[j][0][1] and self.activeCells[j][1] is None:
-                    self.activeCells[j][1] = [sortedList[i][0][0], sortedList[i][0][1]]
-                    return
-                    #return [sortedList[i][0][0], sortedList[i][0][1]]
+            if not self.activeCells[sortedList[i][0][0]][sortedList[i][0][1]]:
+                self.activeCells[x][z] = [sortedList[i][0][0], sortedList[i][0][1]]
+                return
+            
 
     def spanningTree(self):
-        for i in range(len(self.activeCells)):
-            self.closestCell(self.activeCells[i][0][0], self.activeCells[i][0][1])
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                if self.grid[i][j]:
+                    self.closestCell(i, j) 
 
     def createPaths(self):
         for i in range(len(self.activeCells)):
-            for x in range(self.activeCells[i][0][0]+1, self.activeCells[i][1][0]):
-                self.grid[x][self.activeCells[i][0][1]] = "Path"
-            for z in range(self.activeCells[i][0][1]+1, self.activeCells[i][1][1]):
-                self.grid[self.activeCells[i][1][0]][z] = "Path"
-
+            for j in range(len(self.activeCells[0])):
+                if self.activeCells[i][j]:
+                    print (self.activeCells[i][j][0])
+                    for x in range(i+1, self.activeCells[i][j][0]):
+                        self.grid[x][j] = "Path"
+                    for y in range(j+1, self.activeCells[i][j][1]):
+                        self.grid[self.activeCells[i][j][0]][y] = "Path"
 
     def generateVillage(self):
         for i in range(len(self.grid)):
@@ -146,8 +152,7 @@ grid = Grid(area)
 print(grid)
 grid.populate(50, 3, 5, 10)
 print(grid)
-print(grid.activeCells)
 grid.spanningTree()
-print(grid.activeCells)
+print(grid)
 grid.createPaths()
 print(grid)
