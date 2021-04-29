@@ -13,22 +13,31 @@ from worldLoader import WorldSlice
 # x position, z position, x size, z size
 area = (0, 0, 128, 128)
 
-#buildArea = interfaceUtils.requestBuildArea()
-#if buildArea != -1:
-#    x1 = buildArea["xFrom"]
-#    z1 = buildArea["zFrom"]
-#    x2 = buildArea["xTo"]
-#    z2 = buildArea["zTo"]
-#    print(buildArea)
-#    area = (x1, z1, x2 - x1, z2 - z1)
+buildArea = interfaceUtils.requestBuildArea()
+if buildArea != -1:
+    x1 = buildArea["xFrom"]
+    z1 = buildArea["zFrom"]
+    x2 = buildArea["xTo"]
+    z2 = buildArea["zTo"]
+    print(buildArea)
+    area = (x1, z1, x2 - x1, z2 - z1)
 
-#worldSlice = WorldSlice(area)
-#heightmap = mapUtils.calcGoodHeightmap(worldSlice)
+worldSlice = WorldSlice(area)
+heightmap = mapUtils.calcGoodHeightmap(worldSlice)
 
 treeList = ["minecraft:oak_log", "minecraft:spruce_log", "minecraft:birch_log", "minecraft:jungle_log", "minecraft:acacia_log",
             "minecraft:dark_oak_log", "minecraft:brown_mushroom_block", "minecraft:red_mushroom_block",
             "minecraft:mushroom_stem", "minecraft:oak_leaves", "minecraft:spruce_leaves", "minecraft:birch_leaves",
             "minecraft:jungle_leaves", "minecraft:acacia_leaves", "minecraft:dark_oak_leaves"]
+
+def heightAt(x, z):
+    return heightmap[(x - area[0], z - area[1])]
+
+def setBlock(x, y, z, block):
+    interfaceUtils.setBlock(x, y, z, block)
+
+def getBlock(x, y, z):
+    return interfaceUtils.getBlock(x, y, z)
 
 class Grid:
     def __init__(self, area):
@@ -92,13 +101,27 @@ class Grid:
                         if nbs < deathLimit:
                             tempGrid[i][j] = None
                         else:
-                            tempGrid[i][j] = "Structure"
+                            tempGrid[i][j] = structure("Structure")
                     else:
                         if nbs > birthLimit:
-                            tempGrid[i][j] = "Structure"
+                            tempGrid[i][j] = structure("Structure")
                         else:
                             tempGrid[i][j] = None
             self.grid = tempGrid
+
+    def populateSparseArea(self):
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                if not self.grid[i][j]:
+                    temp = random.randint(1, 100)
+                    if temp <= 25:
+                        if (
+                            i-1 >= 0 and not self.grid[i-1][j] and
+                            i+1 < len(self.grid) and not self.grid[i+1][j] and 
+                            j-1 >= 0 and not self.grid[i][j-1] and
+                            j+1 < len(self.grid[0]) and not self.grid[i][j+1]
+                        ):
+                            self.grid[i][j] = structure("Structure")
 
     def closestCell(self, x, z):
         tempList = []
@@ -125,11 +148,59 @@ class Grid:
         for i in range(len(self.activeCells)):
             for j in range(len(self.activeCells[0])):
                 if self.activeCells[i][j]:
-                    print (self.activeCells[i][j][0])
-                    for x in range(i+1, self.activeCells[i][j][0]):
-                        self.grid[x][j] = "Path"
-                    for y in range(j+1, self.activeCells[i][j][1]):
-                        self.grid[self.activeCells[i][j][0]][y] = "Path"
+                    if i < self.activeCells[i][j][0]:
+                        for x in range(i+1, self.activeCells[i][j][0]):
+                            self.grid[x][j] = structure("Path")
+                    elif i > self.activeCells[i][j][0]:
+                        for x in range(self.activeCells[i][j][0]+1, i):
+                            self.grid[x][j] = structure("Path")
+                    if j < self.activeCells[i][j][1]:
+                        for y in range(j+1, self.activeCells[i][j][1]):
+                            self.grid[self.activeCells[i][j][0]][y] = structure("Path")
+                    elif j > self.activeCells[i][j][1]:
+                        for y in range(self.activeCells[i][j][1]+1, j):
+                            self.grid[self.activeCells[i][j][0]][y] = structure("Path")
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                if self.grid[i][j] and self.grid[i][j].getName() == "Structure":
+                    if (i-1 >= 0 and j-1 >= 0 and self.grid[i-1][j-1]):
+                        if not self.grid[i-1][j]:
+                            self.grid[i-1][j] = structure("Path")
+                        elif not self.grid[i][j-1]:
+                            self.grid[i][j-1] = structure("Path")
+                    elif (i+1 < len(self.grid) and j-1 >= 0 and self.grid[i+1][j-1]):
+                        if not self.grid[i][j-1]:
+                            self.grid[i][j-1] = structure("Path")
+                        elif not self.grid[i+1][j]:
+                            self.grid[i+1][j] = structure("Path")
+                    elif (i-1 >= 0 and j+1 < len(self.grid[0]) and self.grid[i-1][j+1]):
+                        if not self.grid[i-1][j]:
+                            self.grid[i-1][j] = structure("Path")
+                        elif not self.grid[i][j+1]:
+                            self.grid[i][j+1] = structure("Path")
+                    elif (i+1 < len(self.grid) and j+1 < len(self.grid[0]) and self.grid[i+1][j+1]):
+                        if not self.grid[i+1][j]:
+                            self.grid[i+1][j] = structure("Path")
+                        elif not self.grid[i][j+1]:
+                            self.grid[i][j+1] = structure("Path")
+
+
+    def randomize(self):
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                if self.grid[i][j].getName() == "Structure":
+                    temp = random.randint(1, 100)
+                    if temp <= 5:
+                        TODO
+                    elif temp <= 30:
+                        self.grid[i][j].setName("Home")
+                    elif temp <= 55:
+                        self.grid[i][j].setName("Home2")
+                    elif temp <= 80:
+                        self.grid[i][j].setName("Home3")
+                    else:
+                        self.grid[i][j].setName("Fountain")
+
 
     def generateVillage(self):
         for i in range(len(self.grid)):
@@ -145,14 +216,59 @@ class structure:
         string = "[Name: " + self.name + "]"
         return string
 
+    def setName(self, newName):
+        self.name = newName
+
+    def getName(self):
+        return self.name
+
     def build(self, x, z):
-        TODO
+        x = x*10
+        z = z*10
+        if self.name == "Path":
+            for i in range(x, x+10):
+                for j in range(z, z+10):
+                    setBlock(i, heightAt(i, j), j, "cobblestone")
+        elif self.name == "Home":
+            TODO
+        elif self.name == "Fountain":
+            TODO
+        elif self.name == "Home2":
+            TODO
+        elif self.name == "Home3":
+            return
+        elif self.name == "Structure":
+            for i in range(x, x+10):
+                for j in range(z, z+10):
+                    setBlock(i, heightAt(i, j), j, "oak_planks")
+
+#Builds fence aroud given build area
+for x in range(area[0], area[0] + area[2]):
+    z = area[1]
+    y = heightAt(x, z)
+    setBlock(x, y - 1, z, "cobblestone")
+    setBlock(x, y,   z, "oak_fence")
+for z in range(area[1], area[1] + area[3]):
+    x = area[0]
+    y = heightAt(x, z)
+    setBlock(x, y - 1, z, "cobblestone")
+    setBlock(x, y, z, "oak_fence")
+for x in range(area[0], area[0] + area[2]):
+    z = area[1] + area[3] - 1
+    y = heightAt(x, z)
+    setBlock(x, y - 1, z, "cobblestone")
+    setBlock(x, y,   z, "oak_fence")
+for z in range(area[1], area[1] + area[3]):
+    x = area[0] + area[2] - 1
+    y = heightAt(x, z)
+    setBlock(x, y - 1, z, "cobblestone")
+    setBlock(x, y, z, "oak_fence")
+
 
 grid = Grid(area)
-print(grid)
-grid.populate(50, 3, 5, 10)
-print(grid)
+grid.populate(10, 3, 3, 10)
+grid.populateSparseArea()
 grid.spanningTree()
-print(grid)
 grid.createPaths()
+grid.generateVillage()
 print(grid)
