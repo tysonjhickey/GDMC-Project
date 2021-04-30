@@ -149,49 +149,54 @@ class Grid:
             for j in range(len(self.activeCells[0])):
                 if self.activeCells[i][j]:
                     if i < self.activeCells[i][j][0]:
-                        for x in range(i+1, self.activeCells[i][j][0]):
-                            self.grid[x][j] = structure("Path")
+                        for x in range(i, self.activeCells[i][j][0]):
+                            if self.grid[x][j] == None:
+                                self.grid[x][j] = structure("Path")
                     elif i > self.activeCells[i][j][0]:
-                        for x in range(self.activeCells[i][j][0]+1, i):
-                            self.grid[x][j] = structure("Path")
+                        for x in range(self.activeCells[i][j][0], i):
+                            if self.grid[x][j] == None:
+                                self.grid[x][j] = structure("Path")
                     if j < self.activeCells[i][j][1]:
-                        for y in range(j+1, self.activeCells[i][j][1]):
-                            self.grid[self.activeCells[i][j][0]][y] = structure("Path")
+                        for y in range(j, self.activeCells[i][j][1]):
+                            if self.grid[self.activeCells[i][j][0]][y] == None:
+                                self.grid[self.activeCells[i][j][0]][y] = structure("Path")
                     elif j > self.activeCells[i][j][1]:
-                        for y in range(self.activeCells[i][j][1]+1, j):
-                            self.grid[self.activeCells[i][j][0]][y] = structure("Path")
-        for i in range(len(self.grid)):
-            for j in range(len(self.grid[0])):
-                if self.grid[i][j] and self.grid[i][j].getName() == "Structure":
-                    if (i-1 >= 0 and j-1 >= 0 and self.grid[i-1][j-1]):
-                        if not self.grid[i-1][j]:
-                            self.grid[i-1][j] = structure("Path")
-                        elif not self.grid[i][j-1]:
-                            self.grid[i][j-1] = structure("Path")
-                    elif (i+1 < len(self.grid) and j-1 >= 0 and self.grid[i+1][j-1]):
-                        if not self.grid[i][j-1]:
-                            self.grid[i][j-1] = structure("Path")
-                        elif not self.grid[i+1][j]:
-                            self.grid[i+1][j] = structure("Path")
-                    elif (i-1 >= 0 and j+1 < len(self.grid[0]) and self.grid[i-1][j+1]):
-                        if not self.grid[i-1][j]:
-                            self.grid[i-1][j] = structure("Path")
-                        elif not self.grid[i][j+1]:
-                            self.grid[i][j+1] = structure("Path")
-                    elif (i+1 < len(self.grid) and j+1 < len(self.grid[0]) and self.grid[i+1][j+1]):
-                        if not self.grid[i+1][j]:
-                            self.grid[i+1][j] = structure("Path")
-                        elif not self.grid[i][j+1]:
-                            self.grid[i][j+1] = structure("Path")
+                        for y in range(self.activeCells[i][j][1], j):
+                            if self.grid[self.activeCells[i][j][0]][y] == None:
+                                self.grid[self.activeCells[i][j][0]][y] = structure("Path")
+        
+        #for i in range(len(self.grid)):
+        #    for j in range(len(self.grid[0])):
+        #        if self.grid[i][j] and self.grid[i][j].getName() == "Structure":
+        #            if (i-1 >= 0 and j-1 >= 0 and self.grid[i-1][j-1]):
+        #                if not self.grid[i-1][j]:
+        #                    self.grid[i-1][j] = structure("Path")
+        #                elif not self.grid[i][j-1]:
+        #                    self.grid[i][j-1] = structure("Path")
+        #            elif (i+1 < len(self.grid) and j-1 >= 0 and self.grid[i+1][j-1]):
+        #                if not self.grid[i][j-1]:
+        #                    self.grid[i][j-1] = structure("Path")
+        #                elif not self.grid[i+1][j]:
+        #                    self.grid[i+1][j] = structure("Path")
+        #            elif (i-1 >= 0 and j+1 < len(self.grid[0]) and self.grid[i-1][j+1]):
+        #                if not self.grid[i-1][j]:
+        #                    self.grid[i-1][j] = structure("Path")
+        #                elif not self.grid[i][j+1]:
+        #                    self.grid[i][j+1] = structure("Path")
+        #            elif (i+1 < len(self.grid) and j+1 < len(self.grid[0]) and self.grid[i+1][j+1]):
+        #                if not self.grid[i+1][j]:
+        #                    self.grid[i+1][j] = structure("Path")
+        #                elif not self.grid[i][j+1]:
+        #                    self.grid[i][j+1] = structure("Path")
 
 
     def randomize(self):
         for i in range(len(self.grid)):
             for j in range(len(self.grid[0])):
-                if self.grid[i][j].getName() == "Structure":
+                if (self.grid[i][j] and self.grid[i][j].getName() == "Structure"):
                     temp = random.randint(1, 100)
                     if temp <= 5:
-                        TODO
+                        self.grid[i][j].setName("Castle")
                     elif temp <= 30:
                         self.grid[i][j].setName("Home")
                     elif temp <= 55:
@@ -200,6 +205,17 @@ class Grid:
                         self.grid[i][j].setName("Home3")
                     else:
                         self.grid[i][j].setName("Fountain")
+
+    def checkMountains(self):
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                if self.grid[i][j]:
+                    x = i*10
+                    z = j*10
+                    for k in range(x, x+9):
+                        for l in range(z, z+9):
+                            if (abs(heightAt(k, l) - heightAt(k+1, z)) > 2 or abs(heightAt(k, l) - heightAt(k, z+1)) > 2):
+                                self.grid[i][j] = structure("Mountain")
 
 
     def generateVillage(self):
@@ -226,21 +242,43 @@ class structure:
         x = x*10
         z = z*10
         if self.name == "Path":
-            for i in range(x, x+10):
-                for j in range(z, z+10):
-                    setBlock(i, heightAt(i, j), j, "cobblestone")
+            return
         elif self.name == "Home":
-            TODO
+            for i in range(x, x+10):
+                setBlock(i, heightAt(i, z), z, "oak_fence")
+                setBlock(i, heightAt(i, z+9), z+9, "oak_fence")
+            for i in range(z, z+10):
+                setBlock(x, heightAt(x, i), i, "oak_fence")
+                setBlock(x+9, heightAt(x+9, i), i, "oak_fence")
+            for i in range(x+2, x+8):
+                for j in range(z+2, z+8):
+                    setBlock(i, heightAt(i, j)-1, j, "oak_planks")
+            for j in range(0, 3):
+                for i in range(x+2, x+8):
+                    setBlock(i, heightAt(i, z+2)+j, z+2, "oak_planks")
+                    setBlock(i, heightAt(i, z+7)+j, z+7, "oak_planks")
+                for k in range(z+2, z+8):
+                    setBlock(x+2, heightAt(x+2, k)+j, k, "oak_planks")
+                    setBlock(x+7, heightAt(x+7, k)+j, k, "oak_planks")
+            for i in range(x+2, x+8):
+                for j in range(z+2, z+8):
+                    setBlock(i, heightAt(i, j)+3, j, "oak_planks")
         elif self.name == "Fountain":
-            TODO
+            return
         elif self.name == "Home2":
-            TODO
+            return
         elif self.name == "Home3":
             return
-        elif self.name == "Structure":
-            for i in range(x, x+10):
-                for j in range(z, z+10):
-                    setBlock(i, heightAt(i, j), j, "oak_planks")
+        #elif self.name == "Structure":
+        #    for i in range(x, x+10):
+        #        for j in range(z, z+10):
+        #            setBlock(i, heightAt(i, j), j, "oak_planks")
+        #    for i in range(x, x+10):
+        #        setBlock(i, heightAt(i, z)+1, z, "oak_fence")
+        #        setBlock(i, heightAt(i, z+9)+1, z+9, "oak_fence")
+        #    for i in range(z, z+10):
+        #        setBlock(x, heightAt(x, i)+1, i, "oak_fence")
+        #        setBlock(x+9, heightAt(x+9, i)+1, i, "oak_fence")
 
 #Builds fence aroud given build area
 for x in range(area[0], area[0] + area[2]):
@@ -268,6 +306,8 @@ for z in range(area[1], area[1] + area[3]):
 grid = Grid(area)
 grid.populate(10, 3, 3, 10)
 grid.populateSparseArea()
+grid.randomize()
+grid.checkMountains()
 grid.spanningTree()
 grid.createPaths()
 grid.generateVillage()
