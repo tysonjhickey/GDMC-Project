@@ -47,6 +47,24 @@ def isClosed(nextNode, node):
             return True
     return False
 
+#def cycleCheck(structureList):
+#        linked = []
+#        found = False
+#        structures = len(structureList)
+#        linked.append(structureList.pop(0))
+#        while(len(structureList) > 0):
+#            found = False
+#            for i in range(len(structureList)):
+#                for j in range(len(linked)):
+#                    if structureList[i].getBestPath()[0] == linked[j].getCoordinate():
+#                        linked.append(structureList.pop(i))
+#                        found = True
+#                        break
+#                if found:
+#                    break
+#            return structureList
+#        return False
+
 class Grid:
     def __init__(self, area):
         self.__area = [math.ceil(area[0] / 15), math.ceil(area[1] / 15), int(area[2] / 15), int(area[3] / 15)]
@@ -61,8 +79,10 @@ class Grid:
                     string += str(0) + " "
                 elif (self.grid[i][j] and self.grid[i][j].isImpass()):
                     string += str(2) + " "
-                else:
+                elif (self.grid[i][j] and self.grid[i][j].getName() == "Path"):
                     string += str(1) + " "
+                else:
+                    string += str(3) + " "
             string += "]\n"
         return string
 
@@ -145,34 +165,9 @@ class Grid:
         #                        self.grid[i][j] = Structure("Mountain", True)
 
 
-    #def distanceBFS(self, x, z, structure):
-    #    open = []
-    #    if x+1 < len(self.grid) and (self.grid[x+1][z] == None or self.grid[x+1][z] and not self.grid[x+1][z].isImpass()):
-    #        open.append([[x+1, z], 1, [[x,z]]])
-    #    if x-1 >= 0 and (self.grid[x-1][z] == None or self.grid[x-1][z] and not self.grid[x-1][z].isImpass()):
-    #        open.append([[x-1, z], 1, [[x,z]]])
-    #    if z+1 < len(self.grid[0]) and (self.grid[x][z+1] == None or self.grid[x][z+1] and not self.grid[x][z+1].isImpass()):
-    #        open.append([[x, z+1], 1, [[x,z]]])
-    #    if z-1 >= 0 and (self.grid[x][z-1] == None or self.grid[x][z-1] and not self.grid[x][z-1].isImpass()):
-    #        open.append([[x, z-1], 1, [[x,z]]])
-    #    #closed = [[False for x in range(self.__area[2])] for y in range(self.__area[3])]
-    #    while(len(open) > 0):
-    #        node = open.pop(0)
-    #        if self.grid[node[0][0]][node[0][1]]:
-    #            structure.addEdge([[node[0][0], node[0][1]], node[1], node[2]])
-    #        else:
-    #            if node[0][0]+1 < len(self.grid) and (self.grid[node[0][0]+1][node[0][1]] == None or self.grid[node[0][0]+1][node[0][1]] and not self.grid[node[0][0]+1][node[0][1]].isImpass()) and not inClosed(node[0][0]+1, node[0][1], node):
-    #                print(open)
-    #                print("\n")
-    #                open.append([[node[0][0]+1, node[0][1]], node[1]+1, node[2].append([node[0][0], node[0][1]])])
-    #            if node[0][0]-1 >= 0 and (self.grid[node[0][0]-1][node[0][1]] == None or self.grid[node[0][0]-1][node[0][1]] and not self.grid[node[0][0]-1][node[0][1]].isImpass()) and not inClosed(node[0][0]-1, node[0][1], node):
-    #                open.append([[node[0][0]-1, node[0][1]], node[1]+1, node[2].append([node[0][0], node[0][1]])])
-    #            if node[0][1]+1 < len(self.grid[0]) and (self.grid[node[0][0]][node[0][1]+1] == None or self.grid[node[0][0]][node[0][1]+1] and not self.grid[node[0][0]][node[0][1]+1].isImpass()) and not inClosed(node[0][0], node[0][1]+1, node):
-    #                open.append([[node[0][0], node[0][1]+1], node[1]+1, node[2].append([node[0][0], node[0][1]])])
-    #            if node[0][1]-1 >= 0 and (self.grid[node[0][0]][node[0][1]-1] == None or self.grid[node[0][0]][node[0][1]-1] and not self.grid[node[0][0]][node[0][1]-1].isImpass()) and not inClosed(node[0][0], node[0][1]-1, node):
-    #                open.append([[node[0][0], node[0][1]-1], node[1]+1, node[2].append([node[0][0], node[0][1]])])
+
     # Edge = [[x,z], dist, [[x,z], ...]]
-    def distanceBFS(self, structure):
+    def distanceBFS(self, structure, paths):
         open = []
         x = structure.getCoordinate()[0]
         z = structure.getCoordinate()[1]
@@ -191,40 +186,26 @@ class Grid:
             if self.grid[node[0][0]][node[0][1]]:
                 structure.addEdge(node)
             else:
-                if node[0][0]+1 < len(self.grid) and (not self.grid[node[0][0]+1][node[0][1]] or self.grid[node[0][0]+1][node[0][1]] and not self.grid[node[0][0]+1][node[0][1]].isImpass()) and not isClosed([node[0][0]+1, node[0][1]], node):
-                    #print("Number1: "+ str(node[2]))
+                if node[0][0]+1 < len(self.grid) and (not self.grid[node[0][0]+1][node[0][1]] or self.grid[node[0][0]+1][node[0][1]] and not self.grid[node[0][0]+1][node[0][1]].isImpass()) and not isClosed([node[0][0]+1, node[0][1]], node) and len(node[2]) <= paths:
                     tempNode = copy.deepcopy(node)
                     tempNode[2].append([node[0][0], node[0][1]])
                     open.append([[tempNode[0][0]+1, tempNode[0][1]], tempNode[1]+1, tempNode[2]])
-                if node[0][1]+1 < len(self.grid[0]) and (not self.grid[node[0][0]][node[0][1]+1] or self.grid[node[0][0]][node[0][1]+1] and not self.grid[node[0][0]][node[0][1]+1].isImpass()) and not isClosed([node[0][0], node[0][1]+1], node):
-                    #print("Number2: "+ str(node[2]))
+                if node[0][1]+1 < len(self.grid[0]) and (not self.grid[node[0][0]][node[0][1]+1] or self.grid[node[0][0]][node[0][1]+1] and not self.grid[node[0][0]][node[0][1]+1].isImpass()) and not isClosed([node[0][0], node[0][1]+1], node) and len(node[2]) <= paths:
                     tempNode = copy.deepcopy(node)
                     tempNode[2].append([node[0][0], node[0][1]])
                     open.append([[tempNode[0][0], tempNode[0][1]+1], tempNode[1]+1, tempNode[2]])
-                if node[0][0]-1 >= 0 and (not self.grid[node[0][0]-1][node[0][1]] or self.grid[node[0][0]-1][node[0][1]] and not self.grid[node[0][0]-1][node[0][1]].isImpass()) and not isClosed([node[0][0]-1, node[0][1]], node):
-                    #print("Number3: "+ str(node[2]))
+                if node[0][0]-1 >= 0 and (not self.grid[node[0][0]-1][node[0][1]] or self.grid[node[0][0]-1][node[0][1]] and not self.grid[node[0][0]-1][node[0][1]].isImpass()) and not isClosed([node[0][0]-1, node[0][1]], node) and len(node[2]) <= paths:
                     tempNode = copy.deepcopy(node)
                     tempNode[2].append([node[0][0], node[0][1]])
                     open.append([[tempNode[0][0]-1, tempNode[0][1]], tempNode[1]+1, tempNode[2]])
-                if node[0][1]-1 >= 0 and (not self.grid[node[0][0]][node[0][1]-1] or self.grid[node[0][0]][node[0][1]-1] and not self.grid[node[0][0]][node[0][1]-1].isImpass()) and not isClosed([node[0][0], node[0][1]-1], node):
-                    #print("Number4: "+ str(node[2]))
+                if node[0][1]-1 >= 0 and (not self.grid[node[0][0]][node[0][1]-1] or self.grid[node[0][0]][node[0][1]-1] and not self.grid[node[0][0]][node[0][1]-1].isImpass()) and not isClosed([node[0][0], node[0][1]-1], node) and len(node[2]) <= paths:
                     tempNode = copy.deepcopy(node)
                     tempNode[2].append([node[0][0], node[0][1]])
                     open.append([[tempNode[0][0], tempNode[0][1]-1], tempNode[1]+1, tempNode[2]])
 
-    def DFSCycleCheck(self, structureList):
 
     def MST(self):
-        structureList = []
-        edgeList = []
-        for i in range(len(self.grid)):
-            for j in range(len(self.grid[0])):
-                if self.grid[i][j] and not self.grid[i][j].isImpass():
-                    self.grid[i][j].bestPath = self.grid[i][j].edges[][2][0]
-                    structureList.append(self.grid[i][j])
-        
-        while not self.DFSCycleCheck(structureList):
-            return
+        TODO
 
 class Structure:
     def __init__(self, coordinate=[], name="Structure", impass=False):
@@ -232,7 +213,6 @@ class Structure:
         self.name = name
         self.impass = impass
         self.edges = []
-        self.bestPath = None
 
     def __str__(self):
         string = "{ Coordinate: " + str(self.coordinate) + ", Name: " + str(self.name) + ", Impass: " + str(self.impass) + "}\nEdges:\n" + "{\n"
@@ -265,8 +245,8 @@ class Structure:
     def addEdge(self, edge):
         self.edges.append(edge)
 
-    def setPath(self, pathList):
-        self.path = pathList
+    def getEdges(self):
+        return self.edges
 
     def build(self):
         return
@@ -276,8 +256,9 @@ def bfsCheck(grid):
     for i in range(len(grid.grid)):
         for j in range(len(grid.grid[0])):
             if grid.grid[i][j] and not grid.grid[i][j].isImpass():
-                grid.distanceBFS(grid.grid[i][j])
+                grid.distanceBFS(grid.grid[i][j], 10)
                 print(grid.grid[i][j].edges[0])
+    print(" \n")
 
 grid = Grid(area)
 grid.populate(25, 3, 5, 10)
@@ -285,5 +266,6 @@ grid.populateSparseArea()
 grid.checkMountains()
 print(grid)
 bfsCheck(grid)
+
 
 
