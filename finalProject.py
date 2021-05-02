@@ -47,23 +47,53 @@ def isClosed(nextNode, node):
             return True
     return False
 
-#def cycleCheck(structureList):
-#        linked = []
-#        found = False
-#        structures = len(structureList)
-#        linked.append(structureList.pop(0))
-#        while(len(structureList) > 0):
-#            found = False
-#            for i in range(len(structureList)):
-#                for j in range(len(linked)):
-#                    if structureList[i].getBestPath()[0] == linked[j].getCoordinate():
-#                        linked.append(structureList.pop(i))
-#                        found = True
-#                        break
-#                if found:
-#                    break
-#            return structureList
-#        return False
+def isClosed2(node, closedList):
+    for i in range(len(closedList)):
+        if node[0] == closedList[i][0] and node[1] == closedList[i][1]:
+            return True
+    return False
+
+def findRelatives(node, nodeList):
+    relatives = []
+    for i in range(len(nodeList)):
+        if node[1] == nodeList[i][0] or node[0] == nodeList[i][1]:
+            nextNode = copy.deepcopy(nodeList[i])
+            nextNode[2] = node[0]
+            relatives.append(nextNode)
+    return relatives
+
+def removeDuplicateEdges(edgeList):
+    for i in range(len(edgeList)):
+        for j in range(len(edgeList)):
+            if i != j and edgeList[i] and edgeList[j] and ((edgeList[i][0] == edgeList[j][0] and edgeList[i][1][0] == edgeList[j][1][0]) or (edgeList[i][0] == edgeList[j][1][0] and edgeList[i][1][0] == edgeList[j][0])):
+                edgeList[j] = None
+    return([i for i in edgeList if i])
+
+
+def cycleCheck(edgeList):
+    if len(edgeList) > 1:
+        tempList = []
+        for i in range(len(edgeList)):
+            tempList.append([copy.deepcopy(edgeList[i][0]), copy.deepcopy(edgeList[i][1][0]), None])
+        for i in range(len(tempList)):
+            closed = []
+            open = [tempList[0]]
+            while len(open) > 0:
+                node = open.pop()
+                relatives = findRelatives(node, tempList)
+                for i in range(len(relatives)):
+                    if isClosed2(relatives[i], closed) and relatives[i][2] != node[0]:
+                        return True
+                    elif not isClosed2(relatives[i], closed):
+                        open.append(relatives[i])
+                closed.append(node)
+        return False
+            
+
+    elif len(edgeList) == 1:
+        return False
+
+
 
 class Grid:
     def __init__(self, area):
@@ -204,8 +234,27 @@ class Grid:
                     open.append([[tempNode[0][0], tempNode[0][1]-1], tempNode[1]+1, tempNode[2]])
 
 
+    #edgeList item = [[x,z], edge]
     def MST(self):
-        TODO
+        edgeList = []
+        vertexList = []
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                if self.grid[i][j] and not self.grid[i][j].isImpass():
+                    vertexList.append(self.grid[i][j])
+                    for k in range(len(self.grid[i][j].getEdges())):
+                        edgeList.append([[i, j], self.grid[i][j].getEdges()[k]])
+        edgeList = sorted(edgeList, key = lambda x: x[1][1])
+        edgeList = removeDuplicateEdges(edgeList)
+        currentEdges = []
+        while len(edgeList) > 0:
+            currentEdges.append(edgeList.pop(0))
+            if cycleCheck(currentEdges):
+                currentEdges.pop()
+            elif len(currentEdges) == len(vertexList)-1:
+                return currentEdges
+        print("No MST possible with current edges")
+        return False
 
 class Structure:
     def __init__(self, coordinate=[], name="Structure", impass=False):
@@ -266,6 +315,9 @@ grid.populateSparseArea()
 grid.checkMountains()
 print(grid)
 bfsCheck(grid)
+edges = grid.MST()
+for i in range(len(edges)):
+    print(edges[i])
 
 
 
