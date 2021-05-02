@@ -58,7 +58,7 @@ def findRelatives(node, nodeList):
     for i in range(len(nodeList)):
         if node[1] == nodeList[i][0] or node[0] == nodeList[i][1]:
             nextNode = copy.deepcopy(nodeList[i])
-            nextNode[2] = node[0]
+            nextNode[2] = copy.deepcopy(node[0])
             relatives.append(nextNode)
     return relatives
 
@@ -77,16 +77,20 @@ def cycleCheck(edgeList):
             tempList.append([copy.deepcopy(edgeList[i][0]), copy.deepcopy(edgeList[i][1][0]), None])
         for i in range(len(tempList)):
             closed = []
+            currentParent = tempList[0]
             open = [tempList[0]]
             while len(open) > 0:
                 node = open.pop()
                 relatives = findRelatives(node, tempList)
                 for i in range(len(relatives)):
-                    if isClosed2(relatives[i], closed) and relatives[i][2] != node[0]:
+                    print("parent: " + str())
+                    if isClosed2(relatives[i], closed) and relatives[i][2] != node[2]:
+                        print("cycle")
                         return True
                     elif not isClosed2(relatives[i], closed):
                         open.append(relatives[i])
                 closed.append(node)
+        print("not cycle")
         return False
             
 
@@ -256,6 +260,10 @@ class Grid:
         print("No MST possible with current edges")
         return False
 
+    def buildPaths(self, edgeList):
+        for i in range(len(edgeList)):
+            for j in range(1, len(edgeList[i][1][2])):
+                self.grid[edgeList[i][1][2][j][0]][edgeList[i][1][2][j][1]] = Structure([edgeList[i][1][2][j][0], edgeList[i][1][2][j][1]], "Path")
 class Structure:
     def __init__(self, coordinate=[], name="Structure", impass=False):
         self.coordinate = coordinate
@@ -306,7 +314,6 @@ def bfsCheck(grid):
         for j in range(len(grid.grid[0])):
             if grid.grid[i][j] and not grid.grid[i][j].isImpass():
                 grid.distanceBFS(grid.grid[i][j], 10)
-                print(grid.grid[i][j].edges[0])
     print(" \n")
 
 grid = Grid(area)
@@ -316,8 +323,12 @@ grid.checkMountains()
 print(grid)
 bfsCheck(grid)
 edges = grid.MST()
+print("edges: " + str(len(edges)))
 for i in range(len(edges)):
-    print(edges[i])
+    print(edges[i][1])
+print("")
+grid.buildPaths(edges)
+print(grid)
 
 
 
