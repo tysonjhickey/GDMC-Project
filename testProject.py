@@ -215,7 +215,7 @@ class Grid:
                     for k in range(x, x+9):
                         for l in range(z, z+9):
                             if (abs(heightAt(k, l) - heightAt(k+1, z)) > 2 or abs(heightAt(k, l) - heightAt(k, z+1)) > 2):
-                                self.grid[i][j] = structure("Mountain")
+                                self.grid[i][j] = structure("Mountain") 
 
 
     def generateVillage(self):
