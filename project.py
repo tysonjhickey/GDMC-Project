@@ -343,7 +343,7 @@ class Grid:
                                 setBlock(i, heightAt(i, j), j, "bedrock")
 
                     #Cabin
-                    elif self.grid[x][z].identifier == 3:
+                    elif self.grid[x][z].identifier == 10:
                         for i in range(startX, startX+16):
                             setBlock(i, h+1, startZ, "oak_fence")
                             setBlock(i, h+1, startZ+15, "oak_fence")
@@ -580,9 +580,74 @@ class Grid:
                     elif self.grid[x][z].identifier == 4:
                         return
 
-                    #Somethin
-                    elif self.grid[x][z].identifier == 5:
-                        return
+                    #Fountain
+                    elif self.grid[x][z].identifier == 3:
+                        for i in range(startX+3, startX+13):
+                            for k in range(startZ+3, startZ+13):
+                                setBlock(i, h, k, "stone_bricks")
+                        for i in range(startX+3, startX+13):
+                            setBlock(i, h+1, startZ+3, "stone_brick_slab")
+                            setBlock(i, h+1, startZ+12, "stone_brick_slab")
+                        for k in range(startZ+3, startZ+13):
+                            setBlock(startX+3, h+1, k, "stone_brick_slab")
+                            setBlock(startX+12, h+1, k, "stone_brick_slab")
+                        for i in range(startX+5, startX+10):
+                            setBlock(i, h+1, startZ+5, "stone_brick_slab")
+                            setBlock(i, h+1, startZ+9, "stone_brick_slab")
+                        for k in range(startZ+5, startZ+10):
+                            setBlock(startX+5, h+1, k, "stone_brick_slab")
+                            setBlock(startX+10, h+1, k, "stone_brick_slab")
+                        setBlock(startX+7, h+1, startZ+7, "stone_bricks")
+                        setBlock(startX+7, h+2, startZ+7, "stone_bricks")
+                        setBlock(startX+7, h+1, startZ+8, "stone_bricks")
+                        setBlock(startX+7, h+2, startZ+8, "stone_bricks")
+                        setBlock(startX+8, h+1, startZ+7, "stone_bricks")
+                        setBlock(startX+8, h+2, startZ+7, "stone_bricks")
+                        setBlock(startX+8, h+1, startZ+8, "stone_bricks")
+                        setBlock(startX+8, h+2, startZ+8, "stone_bricks")
+                        setBlock(startX+7, h+3, startZ+7, "water")
+                        setBlock(startX+7, h+3, startZ+8, "water")
+                        setBlock(startX+8, h+3, startZ+7, "water")
+                        setBlock(startX+8, h+3, startZ+8, "water")
+
+                        if connectingCells[0]:
+                            setBlock(startX+7, h+1, startZ+3, "air")
+                            setBlock(startX+8, h+1, startZ+3, "air")
+                            for i in range(startX+6, startX+10):
+                                for k in range(startZ, startZ+4):
+                                    setBlock(i, h, k, "stone_bricks")
+                            for k in range(startZ, startZ+4):
+                                setBlock(startX+6, h+1, k, "stone_brick_slab")
+                                setBlock(startX+9, h+1, k, "stone_brick_slab")
+                        if connectingCells[1]:
+                            setBlock(startX+3, h+1, startZ+7, "air")
+                            setBlock(startX+3, h+1, startZ+8, "air")
+                            for i in range(startX, startX+4):
+                                for k in range(startZ+6, startZ+10):
+                                    setBlock(i, h, k, "stone_bricks")
+                            for i in range(startX, startX+4):
+                                setBlock(i, h+1, startZ+6, "stone_brick_slab")
+                                setBlock(i, h+1, startZ+9, "stone_brick_slab")
+                        if connectingCells[2]:
+                            setBlock(startX+8, h+1, startZ+12, "air")
+                            setBlock(startX+7, h+1, startZ+12, "air")
+                            for i in range(startX+6, startX+10):
+                                for k in range(startZ+12, startZ+16):
+                                    setBlock(i, h, k, "stone_bricks")
+                            for k in range(startZ+12, startZ+16):
+                                setBlock(startX+6, h+1, k, "stone_brick_slab")
+                                setBlock(startX+9, h+1, k, "stone_brick_slab")
+                        if connectingCells[3]:
+                            setBlock(startX+12, h+1, startZ+8, "air")
+                            setBlock(startX+12, h+1, startZ+7, "air")
+                            for i in range(startX+12, startX+16):
+                                for k in range(startZ+6, startZ+10):
+                                    setBlock(i, h, k, "stone_bricks")
+                            for i in range(startX+12, startX+16):
+                                setBlock(i, h+1, startZ+9, "stone_brick_slab")
+                                setBlock(i, h+1, startZ+6, "stone_brick_slab")
+
+                        
 
                     #Castle
                     elif self.grid[x][z].identifier == 6:
